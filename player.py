@@ -1,13 +1,13 @@
 import random, math
 
 class player:
-    def __init__(self, name, role):
+    def __init__(self, name, role, start_tile):
         self.name = name
         self.role = role
         self.alive = True
         self.max_health = self.__decide_health()
         self.health = self.max_health
-        self.possition = None
+        self.possition = start_tile
         self.cooldown = 0
         self.resistance = 0
     

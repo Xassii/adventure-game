@@ -2,9 +2,9 @@ import random
 import adventuretexts as at
 
 class game_state:
-    def __init__(self, hp, turns, p, tiles):
-        self.monster = {'hp': hp, 'p_at': [], 'Location': None}
-        self.__turns = turns
+    def __init__(self, p, tiles):
+        self.monster = {'p_at': [], 'Location': None}
+        self.__turns = len(p)
         self.__turn = 0
         self.players = p
         self.dead = []
@@ -12,6 +12,7 @@ class game_state:
         self.__tiles = tiles
         self.__map = self.__create_map()
         self.__monster_str = self.__determen_strength()
+        self.monster['hp'] = self.__determen_hp()
     
     def __str__(self):
         text = f'\nMonster HP: {self.monster['hp']}\nPlayers:'
@@ -21,12 +22,20 @@ class game_state:
         return text
         
     def __determen_strength(self):
-        if len(self.players) > 2:
+        if self.__turns > 2:
             return 2
-        elif len(self.players) > 1:
+        elif self.__turns > 1:
             return 1
         else:
             return 0
+    
+    def __determen_hp(self):
+        monster_health = 0
+        
+        for pc in self.players:
+            monster_health += pc.health * 2
+        
+        return monster_health
     
     def next_turn(self):
         self.__turn = (self.__turn + 1) % (self.__turns + 1)
@@ -47,7 +56,8 @@ class game_state:
             self.dead.append(pc)
             self.players.remove(pc)
             self.monster['p_at'].remove(pc)
-            self.__turn = -1
+            self.__turns -= 1
+            self.__turn -= 1
     
     def m_attack(self):
         damage2 = 0

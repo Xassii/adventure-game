@@ -1,10 +1,10 @@
-import random, math
+import random
 from game_state import game_state
 from player import player
 from room import room
 import adventuretexts as at
 
-def def_int_input(min, max, text=''):
+def def_int_input(min:int, max:int, text=''):
     """
     Requiers user to input a number between min and max.
     
@@ -34,7 +34,7 @@ def def_int_input(min, max, text=''):
             print('\nNeed to be a number!')
 
 
-def create_players(num):
+def create_players(num:int, start_tile):
     players = []
     roles = ['Paladin', 'Warior', 'Warlock']
     for i in range(num):
@@ -42,7 +42,7 @@ def create_players(num):
         text = f'What role shuld {name} be?\n1 - Paladin'
         text += ', 2 - Warior or 3 - Warlock: '
         role_num = def_int_input(1, 3, text) - 1
-        players.append(player(name, roles[role_num]))
+        players.append(player(name, roles[role_num], start_tile))
         
         text = f'{players[i].name} is a {players[i].role} with'
         text += f' {players[i].max_health} points of health.'
@@ -51,7 +51,7 @@ def create_players(num):
     return players
 
 
-def add_tiles(num, exist, neigbor):
+def add_tiles(num:int, exist, neigbor):
     tiles = []
     for i in range(num):
         next_room = random.choice(neigbor)
@@ -100,26 +100,25 @@ def connect_tiles(tiles):
                     break
 
 
-def create_tiles(): #This aint great
+def create_tiles(num): #This aint great
     tiles = []
     tiles.append(room(0, 0, 'You return to the start.'))
     for x, y in [[-1, 0], [0, -1], [1, 0], [0, 1]]:
         text = random.choice(at.r_desc)
         tiles.append(room(x, y, text))
     
-    tile_num = def_int_input(5, 25, '\nHow many rooms shoud there be? (5-25): ')
-    tile_num -= 5
-    if tile_num:
+    num -= 5
+    if num:
         existing_rooms = [[0, 0], [-1, 0], [0, -1], [1, 0], [0, 1]]
         neigbors = [[2, 0], [1, 1], [1, -1], [-2, 0], [-1, 1],
                     [-1, -1], [0, -2], [0, 2]]
-        new = add_tiles(tile_num, existing_rooms, neigbors)
+        new = add_tiles(num, existing_rooms, neigbors)
         tiles = tiles + new
     
     connect_tiles(tiles)
     
     types = ['M', 'L']
-    if tile_num >= 10:
+    if num >= 10:
         types.append('T')
     tiles[0].type = 'S'
     for i in types:
@@ -141,21 +140,11 @@ def create_tiles(): #This aint great
 def setupp():
     print(at.instructions)
     player_num = def_int_input(1, 4, 'How many players? (1-4): ')
-    players = create_players(player_num)
+    tile_num = def_int_input(5, 25, '\nHow many rooms shoud there be? (5-25): ')
+    tiles = create_tiles(tile_num)
+    players = create_players(player_num, tiles[0])
     
-    monster_health = 0
-    if len(players) > 1:
-        for pc in players:
-            monster_health += pc.health * 2
-    else:
-        monster_health += math.floor(players[0].health * 1.5)
-    
-    tiles = create_tiles()
-    
-    for pc in players:
-        pc.possition = tiles[0]
-    
-    game = game_state(monster_health, player_num, players, tiles)
+    game = game_state(players, tiles)
     
     return game
 
@@ -338,3 +327,5 @@ def play(): #TODO To long. Break into smaler functions
 if __name__ == '__main__':
     play()
     #TODO Sneak upp on monster. Attack first. Mayby choose if you run or get locked into fighting the monster.
+    #TODO Pick upp boddies
+    #TODO Add small encounters
